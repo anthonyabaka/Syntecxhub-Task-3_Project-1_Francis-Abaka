@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Dynamic Quiz App</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            color: #f8fafc;
+        }
+
+        /* Main App Card Container */
+        .quiz-card {
+            width: 100%;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Header Progress Indicators */
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .progress-text {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #6366f1, #a855f7);
+            border-radius: 3px;
+            transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Animated Question Wrapper Elements */
+        .quiz-body {
+            opacity: 1;
+            transform: scale(1);
+            transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .quiz-body.fade-out {
+            opacity: 0;
+            transform: scale(0.97);
+        }
+
+        .question-text {
+            font-size: 1.35rem;
+            font-weight: 700;
+            line-height: 1.4;
+            margin-bottom: 24px;
+            color: #fff;
+            letter-spacing: -0.01em;
+        }
+
+        /* Option Row Elements */
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        .option-btn {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 16px 20px;
+            text-align: left;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #cbd5e1;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            outline: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        .option-btn.selected {
+            background: rgba(99, 102, 241, 0.15);
+            border-color: #6366f1;
+            color: #93c5fd;
+            box-shadow: 0 0 16px rgba(99, 102, 241, 0.1);
+        }
+
+        /* State Visual Feedback Layouts */
+        .option-btn.correct {
+            background: rgba(34, 197, 94, 0.15) !important;
+            border-color: #22c55e !important;
+            color: #4ade80 !important;
+        }
+
+        .option-btn.incorrect {
+            background: rgba(239, 68, 68, 0.15) !important;
+            border-color: #ef4444 !important;
+            color: #f87171 !important;
+        }
+
+        /* Dynamic Icon Generation for choices */
+        .option-btn::after {
+            content: '';
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+        }
+
+        .option-btn.selected::after {
+            border-color: #6366f1;
+            background: #6366f1;
+            box-shadow: inset 0 0 0 3px rgba(15, 23, 42, 1);
+        }
+
+        .option-btn.correct::after {
+            border-color: #22c55e;
+            background: #22c55e;
+            box-shadow: inset 0 0 0 3px rgba(15, 23, 42, 1);
+        }
+
+        .option-btn.incorrect::after {
+            border-color: #ef4444;
+            background: #ef4444;
+            box-shadow: inset 0 0 0 3px rgba(15, 23, 42, 1);
+        }
+
+        /* Action Footer Buttons */
+        .action-btn {
+            width: 100%;
+            background: #6366f1;
+            color: #fff;
+            border: none;
+            border-radius: 14px;
+            padding: 16px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .action-btn:hover:not(:disabled) {
+            background: #4f46e5;
+            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+        }
+
+        .action-btn:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        .action-btn:disabled {
+            background: rgba(255, 255, 255, 0.05);
+            color: #64748b;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* Results Dashboard View Styling */
+        .results-view {
+            display: none;
+            text-align: center;
+            animation: scaleUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes scaleUp {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 24px;
+            font-size: 2rem;
+            font-weight: 800;
+            color: #a855f7;
+            box-shadow: 0 0 24px rgba(168, 85, 247, 0.15);
+        }
+
+        .results-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .results-subtitle {
+            color: #94a3b8;
+            margin-bottom: 32px;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        /* Mobile Constraints optimization */
+        @media (max-width: 600px) {
+            .quiz-card {
+                padding: 20px;
+                border-radius: 20px;
+            }
+
+            .question-text {
+                font-size: 1.15rem;
+            }
+
+            .option-btn {
+                padding: 14px 16px;
+                font-size: 0.95rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="quiz-card">
+        <div id="quizGame">
+            <div class="quiz-header">
+                <span class="progress-text" id="progressText">Question 1 of 4</span>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+            <br>
+
+            <div class="quiz-body" id="quizBody">
+                <h2 class="question-text" id="questionText">Loading Question Asset...</h2>
+                <div class="options-list" id="optionsContainer"></div>
+            </div>
+
+            <button class="action-btn" id="actionBtn" disabled>Submit Answer</button>
+        </div>
+
+        <div class="results-view" id="quizResults">
+            <div class="score-circle" id="scoreMetric">0%</div>
+            <h2 class="results-title" id="resultsTitle">Quiz Complete!</h2>
+            <p class="results-subtitle" id="resultsFeedback">You scored 0 out of 0 points.</p>
+            <button class="action-btn" id="restartBtn">Restart Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. Quiz Bank Data Set ---
+        const quizData = [
+            {
+                question: "Which web engineering standard manages layout orientations safely via GPU translation execution matrices?",
+                options: ["CSS transforms", "HTML absolute buffers", "Flex absolute bounds", "Standard block-margins"],
+                correct: 0
+            },
+            {
+                question: "What is the primary function of utilizing WAI-ARIA tabindex tokens inside hidden carousel elements?",
+                options: ["Speeds up network fetches", "Prevents offscreen element keyboard tab-hijacks", "Triggers hardware image scales", "Forces cross-origin layout cache loads"],
+                correct: 1
+            },
+            {
+                question: "Which micro-interaction strategy enforces input handling integrity across rapid event firing cycles?",
+                options: ["DOM Mutation Observer", "Event Loop Thread Blocking", "Programmatic Input Debouncing/State Locks", "CSS Transition End Step Hooks"],
+                correct: 2
+            },
+            {
+                question: "What structural method prevents layout clipping behaviors across responsive fluid sizing wrappers?",
+                options: ["Hardcoded absolute boundaries", "Viewport width safety scaling percentage locks", "Explicit line visibility masks", "Global overflow tracking blocks"],
+                correct: 1
+            }
+        ];
+
+        // --- 2. State Variable Configuration ---
+        let currentQuestionIndex = 0;
+        let userScore = 0;
+        let selectedOptionIndex = null;
+        let isAnswerSubmitted = false;
+
+        // --- 3. DOM Component Selections ---
+        const quizGame = document.getElementById('quizGame');
+        const quizBody = document.getElementById('quizBody');
+        const progressText = document.getElementById('progressText');
+        const progressBar = document.getElementById('progressBar');
+        const questionText = document.getElementById('questionText');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const actionBtn = document.getElementById('actionBtn');
+
+        const quizResults = document.getElementById('quizResults');
+        const scoreMetric = document.getElementById('scoreMetric');
+        const resultsTitle = document.getElementById('resultsTitle');
+        const resultsFeedback = document.getElementById('resultsFeedback');
+        const restartBtn = document.getElementById('restartBtn');
+
+        // --- 4. Core Core App Engine ---
+        function initQuiz() {
+            currentQuestionIndex = 0;
+            userScore = 0;
+            selectedOptionIndex = null;
+            isAnswerSubmitted = false;
+
+            quizResults.style.display = 'none';
+            quizGame.style.display = 'block';
+
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            selectedOptionIndex = null;
+            isAnswerSubmitted = false;
+            actionBtn.innerText = "Submit Answer";
+            actionBtn.disabled = true;
+
+            const currentQuiz = quizData[currentQuestionIndex];
+
+            // Update header progress components
+            progressText.innerText = `Question ${currentQuestionIndex + 1} of ${quizData.length}`;
+            const progressPercent = ((currentQuestionIndex) / quizData.length) * 100;
+            progressBar.style.width = `${progressPercent}%`;
+
+            // Assign core textual data
+            questionText.innerText = currentQuiz.question;
+            optionsContainer.innerHTML = '';
+
+            // Generate dynamic option elements
+            currentQuiz.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.classList.add('option-btn');
+                button.innerText = option;
+                button.addEventListener('click', () => selectOption(index));
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        function selectOption(index) {
+            if (isAnswerSubmitted) return; // Ignore input if evaluation lock is active
+
+            selectedOptionIndex = index;
+            actionBtn.disabled = false;
+
+            // Toggle focus tracking layout flags cleanly
+            const optionButtons = optionsContainer.children;
+            for (let i = 0; i < optionButtons.length; i++) {
+                optionButtons[i].classList.toggle('selected', i === index);
+            }
+        }
+
+        function handleActionButtonClick() {
+            if (!isAnswerSubmitted) {
+                evaluateAnswer();
+            } else {
+                advanceNextQuestion();
+            }
+        }
+
+        function evaluateAnswer() {
+            isAnswerSubmitted = true;
+            const currentQuiz = quizData[currentQuestionIndex];
+            const optionButtons = optionsContainer.children;
+
+            // Interlock all choices from altering states midway through validation processes
+            for (let i = 0; i < optionButtons.length; i++) {
+                optionButtons[i].disabled = true;
+                if (i === currentQuiz.correct) {
+                    optionButtons[i].classList.add('correct');
+                } else if (i === selectedOptionIndex) {
+                    optionButtons[i].classList.add('incorrect');
+                }
+            }
+
+            if (selectedOptionIndex === currentQuiz.correct) {
+                userScore++;
+            }
+
+            // Transition action button context layout targets
+            if (currentQuestionIndex === quizData.length - 1) {
+                actionBtn.innerText = "Finish Quiz";
+            } else {
+                actionBtn.innerText = "Next Question";
+            }
+        }
+
+        function advanceNextQuestion() {
+            currentQuestionIndex++;
+
+            if (currentQuestionIndex < quizData.length) {
+                // Trigger a sleek outward fade before rebuilding markup fields
+                quizBody.classList.add('fade-out');
+                setTimeout(() => {
+                    renderQuestion();
+                    quizBody.classList.remove('fade-out');
+                }, 300);
+            } else {
+                renderResults();
+            }
+        }
+
+        function renderResults() {
+            // Sync remaining tracking progress fill bar frame space
+            progressBar.style.width = '100%';
+
+            quizGame.style.display = 'none';
+            quizResults.style.display = 'block';
+
+            const finalPercentage = Math.round((userScore / quizData.length) * 100);
+            scoreMetric.innerText = `${finalPercentage}%`;
+
+            // Select contextual feedback header messages
+            if (finalPercentage === 100) {
+                resultsTitle.innerText = "Perfect Score!";
+            } else if (finalPercentage >= 70) {
+                resultsTitle.innerText = "Excellent Job!";
+            } else {
+                resultsTitle.innerText = "Quiz Completed";
+            }
+
+            resultsFeedback.innerText = `You answered ${userScore} out of ${quizData.length} questions correctly.`;
+        }
+
+        // --- 5. Global Control Action Listeners ---
+        actionBtn.addEventListener('click', handleActionButtonClick);
+        restartBtn.addEventListener('click', initQuiz);
+
+        // Bootstrap Game Initializer Execution Run
+        initQuiz();
+    </script>
+</body>
+
+</html>
