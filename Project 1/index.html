@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modern Dynamic Quiz App</title>
     <style>
+        /* ==========================================
+           1. CORE CSS RESET & AMBIENT BASE
+           ========================================== */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -23,13 +26,15 @@
             color: #f8fafc;
         }
 
-        /* Main App Card Container */
+        /* ==========================================
+           2. GLASSMORPHISM MAIN CARD WRAPPER
+           ========================================== */
         .quiz-card {
             width: 100%;
             max-width: 600px;
             background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 24px;
             padding: 32px;
@@ -38,7 +43,9 @@
             overflow: hidden;
         }
 
-        /* Header Progress Indicators */
+        /* ==========================================
+           3. APPLICATION MONITORING PROGRESS ROW
+           ========================================== */
         .quiz-header {
             display: flex;
             justify-content: space-between;
@@ -69,7 +76,9 @@
             transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        /* Animated Question Wrapper Elements */
+        /* ==========================================
+           4. STAGED QUESTION FRAMES & ANIMATIONS
+           ========================================== */
         .quiz-body {
             opacity: 1;
             transform: scale(1);
@@ -90,7 +99,9 @@
             letter-spacing: -0.01em;
         }
 
-        /* Option Row Elements */
+        /* ==========================================
+           5. CHOICE GRID ITEMS & DESIGN SYSTEM
+           ========================================== */
         .options-list {
             display: flex;
             flex-direction: column;
@@ -129,7 +140,7 @@
             box-shadow: 0 0 16px rgba(99, 102, 241, 0.1);
         }
 
-        /* State Visual Feedback Layouts */
+        /* State Color Coding Modifications */
         .option-btn.correct {
             background: rgba(34, 197, 94, 0.15) !important;
             border-color: #22c55e !important;
@@ -142,7 +153,7 @@
             color: #f87171 !important;
         }
 
-        /* Dynamic Icon Generation for choices */
+        /* Pseudo Radio Indicator Formations */
         .option-btn::after {
             content: '';
             width: 18px;
@@ -171,7 +182,9 @@
             box-shadow: inset 0 0 0 3px rgba(15, 23, 42, 1);
         }
 
-        /* Action Footer Buttons */
+        /* ==========================================
+           6. PRIMARY ACTION FORWARD ACTION FOOTER
+           ========================================== */
         .action-btn {
             width: 100%;
             background: #6366f1;
@@ -202,7 +215,9 @@
             box-shadow: none;
         }
 
-        /* Results Dashboard View Styling */
+        /* ==========================================
+           7. FINISHED METRICS VIEW OVERRIDES
+           ========================================== */
         .results-view {
             display: none;
             text-align: center;
@@ -250,7 +265,9 @@
             line-height: 1.5;
         }
 
-        /* Mobile Constraints optimization */
+        /* ==========================================
+           8. RESPONSIVE DEVICE CONSTRAINTS 
+           ========================================== */
         @media (max-width: 600px) {
             .quiz-card {
                 padding: 20px;
@@ -286,19 +303,19 @@
                 <div class="options-list" id="optionsContainer"></div>
             </div>
 
-            <button class="action-btn" id="actionBtn" disabled>Submit Answer</button>
+            <button class="action-btn" id="actionBtn" disabled type="button">Submit Answer</button>
         </div>
 
         <div class="results-view" id="quizResults">
             <div class="score-circle" id="scoreMetric">0%</div>
             <h2 class="results-title" id="resultsTitle">Quiz Complete!</h2>
             <p class="results-subtitle" id="resultsFeedback">You scored 0 out of 0 points.</p>
-            <button class="action-btn" id="restartBtn">Restart Quiz</button>
+            <button class="action-btn" id="restartBtn" type="button">Restart Quiz</button>
         </div>
     </div>
 
     <script>
-        // --- 1. Quiz Bank Data Set ---
+        // --- 1. Global Questionnaire Objects Array ---
         const quizData = [
             {
                 question: "Which web engineering standard manages layout orientations safely via GPU translation execution matrices?",
@@ -322,13 +339,13 @@
             }
         ];
 
-        // --- 2. State Variable Configuration ---
+        // --- 2. Runtime Tracking Environment States ---
         let currentQuestionIndex = 0;
         let userScore = 0;
         let selectedOptionIndex = null;
         let isAnswerSubmitted = false;
 
-        // --- 3. DOM Component Selections ---
+        // --- 3. DOM Cache Pointers Selection ---
         const quizGame = document.getElementById('quizGame');
         const quizBody = document.getElementById('quizBody');
         const progressText = document.getElementById('progressText');
@@ -343,7 +360,7 @@
         const resultsFeedback = document.getElementById('resultsFeedback');
         const restartBtn = document.getElementById('restartBtn');
 
-        // --- 4. Core Core App Engine ---
+        // --- 4. Main Event Pipeline Processing Core ---
         function initQuiz() {
             currentQuestionIndex = 0;
             userScore = 0;
@@ -364,19 +381,20 @@
 
             const currentQuiz = quizData[currentQuestionIndex];
 
-            // Update header progress components
+            // Render current step indexing indicators
             progressText.innerText = `Question ${currentQuestionIndex + 1} of ${quizData.length}`;
-            const progressPercent = ((currentQuestionIndex) / quizData.length) * 100;
+            const progressPercent = (currentQuestionIndex / quizData.length) * 100;
             progressBar.style.width = `${progressPercent}%`;
 
-            // Assign core textual data
+            // Assign pure data models directly to standard layouts
             questionText.innerText = currentQuiz.question;
             optionsContainer.innerHTML = '';
 
-            // Generate dynamic option elements
+            // Process iteration maps over choices structures
             currentQuiz.options.forEach((option, index) => {
                 const button = document.createElement('button');
                 button.classList.add('option-btn');
+                button.type = 'button';
                 button.innerText = option;
                 button.addEventListener('click', () => selectOption(index));
                 optionsContainer.appendChild(button);
@@ -384,12 +402,12 @@
         }
 
         function selectOption(index) {
-            if (isAnswerSubmitted) return; // Ignore input if evaluation lock is active
+            if (isAnswerSubmitted) return; // Prevent mutation alterations if locked
 
             selectedOptionIndex = index;
             actionBtn.disabled = false;
 
-            // Toggle focus tracking layout flags cleanly
+            // Enforce synchronous single token validation updates
             const optionButtons = optionsContainer.children;
             for (let i = 0; i < optionButtons.length; i++) {
                 optionButtons[i].classList.toggle('selected', i === index);
@@ -409,7 +427,7 @@
             const currentQuiz = quizData[currentQuestionIndex];
             const optionButtons = optionsContainer.children;
 
-            // Interlock all choices from altering states midway through validation processes
+            // Interlock input fields against race modifications during active frame validation
             for (let i = 0; i < optionButtons.length; i++) {
                 optionButtons[i].disabled = true;
                 if (i === currentQuiz.correct) {
@@ -423,7 +441,7 @@
                 userScore++;
             }
 
-            // Transition action button context layout targets
+            // Adjust navigation action pointers contextually
             if (currentQuestionIndex === quizData.length - 1) {
                 actionBtn.innerText = "Finish Quiz";
             } else {
@@ -435,7 +453,7 @@
             currentQuestionIndex++;
 
             if (currentQuestionIndex < quizData.length) {
-                // Trigger a sleek outward fade before rebuilding markup fields
+                // Outward transition animation stage handling
                 quizBody.classList.add('fade-out');
                 setTimeout(() => {
                     renderQuestion();
@@ -447,7 +465,7 @@
         }
 
         function renderResults() {
-            // Sync remaining tracking progress fill bar frame space
+            // Fill visual remaining scale constraints 
             progressBar.style.width = '100%';
 
             quizGame.style.display = 'none';
@@ -456,7 +474,7 @@
             const finalPercentage = Math.round((userScore / quizData.length) * 100);
             scoreMetric.innerText = `${finalPercentage}%`;
 
-            // Select contextual feedback header messages
+            // Assign qualitative title messaging variables 
             if (finalPercentage === 100) {
                 resultsTitle.innerText = "Perfect Score!";
             } else if (finalPercentage >= 70) {
@@ -468,11 +486,11 @@
             resultsFeedback.innerText = `You answered ${userScore} out of ${quizData.length} questions correctly.`;
         }
 
-        // --- 5. Global Control Action Listeners ---
+        // --- 5. Framework Control Action Receivers ---
         actionBtn.addEventListener('click', handleActionButtonClick);
         restartBtn.addEventListener('click', initQuiz);
 
-        // Bootstrap Game Initializer Execution Run
+        // Bootstrap Core App Launcher Configuration Instance Execution Block
         initQuiz();
     </script>
 </body>
